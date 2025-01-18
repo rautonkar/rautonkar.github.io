@@ -41,7 +41,6 @@ jobs:
 
     - name: Commit and Push index.html
       run: |
-        mv index.html index.html # Keep in the root of the repo
         git add index.html
         git commit -m "Update index.html from the latest release"
         git push
