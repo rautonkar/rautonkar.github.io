@@ -1,0 +1,49 @@
+name: Update GitHub Pages with Resume
+
+on:
+  schedule:
+    - cron: "0 12 * * *" # Runs daily at 12:00 UTC
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update_pages:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Master Branch
+      uses: actions/checkout@v3
+      with:
+        ref: master # GitHub Pages publishing branch
+
+    - name: Get Latest Release from Source Repository
+      id: get_release
+      run: |
+        REPO="rautonkar/resume" # Source repository
+        LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO/releases/latest)
+        DOWNLOAD_URL=$(echo "$LATEST_RELEASE" | jq -r '.assets[] | select(.name=="index.html") | .browser_download_url')
+        
+        if [ -z "$DOWNLOAD_URL" ]; then
+          echo "No index.html file found in the latest release."
+          exit 1
+        fi
+        
+        echo "Download URL: $DOWNLOAD_URL"
+        echo "download_url=$DOWNLOAD_URL" >> $GITHUB_ENV
+
+    - name: Download index.html
+      run: |
+        curl -L "${{ env.download_url }}" -o index.html
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit and Push index.html
+      run: |
+        mv index.html index.html # Keep in the root of the repo
+        git add index.html
+        git commit -m "Update index.html from the latest release"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
