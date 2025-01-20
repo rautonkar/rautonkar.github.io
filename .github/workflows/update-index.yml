@@ -34,6 +34,24 @@ jobs:
       run: |
         curl -L "${{ env.download_url }}" -o index.html
 
+    - name: Compare index.html Files
+      id: compare_files
+      run: |
+        if [ -f index.html ]; then
+          # Compare hash values
+          OLD_HASH=$(sha256sum index.html | awk '{print $1}')
+          NEW_HASH=$(sha256sum new_index.html | awk '{print $1}')
+          echo "Old Hash: $OLD_HASH"
+          echo "New Hash: $NEW_HASH"
+
+          if [ "$OLD_HASH" = "$NEW_HASH" ]; then
+            echo "No changes detected in index.html. Exiting workflow."
+            exit 0
+          fi
+        else
+          echo "index.html does not exist in the repository. Proceeding with update."
+        fi
+
     - name: Configure Git
       run: |
         git config --global user.name "github-actions[bot]"
