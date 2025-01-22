@@ -32,7 +32,7 @@ jobs:
 
     - name: Download index.html
       run: |
-        curl -L "${{ env.download_url }}" -o index.html
+        curl -L "${{ env.download_url }}" -o new_index.html
 
     - name: Compare index.html Files
       id: compare_files
@@ -51,6 +51,9 @@ jobs:
         else
           echo "index.html does not exist in the repository. Proceeding with update."
         fi
+        
+    - name: Replace index.html
+      run: mv new_index.html index.html
 
     - name: Configure Git
       run: |
