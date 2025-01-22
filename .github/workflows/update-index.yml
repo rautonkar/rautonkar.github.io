@@ -31,6 +31,7 @@ jobs:
         echo "download_url=$DOWNLOAD_URL" >> $GITHUB_ENV
 
     - name: Download index.html
+      id: s
       run: |
         curl -L "${{ env.download_url }}" -o new_index.html
 
@@ -46,21 +47,27 @@ jobs:
 
           if [ "$OLD_HASH" = "$NEW_HASH" ]; then
             echo "No changes detected in index.html. Exiting workflow."
-            exit 0
+            exit 1
           fi
         else
           echo "index.html does not exist in the repository. Proceeding with update."
         fi
         
     - name: Replace index.html
+      id: replace_index
+      if: steps.compare_files.conclusion == 'success'
       run: mv new_index.html index.html
 
     - name: Configure Git
+      id: configure_git
+      if: steps.replace_index.conclusion == 'success'
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Commit and Push index.html
+      id: commit_push
+      if: steps.configure_git.conclusion == 'success'
       run: |
         git add index.html
         git commit -m "Update index.html from the latest release"
