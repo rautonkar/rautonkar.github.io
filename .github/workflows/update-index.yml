@@ -59,7 +59,7 @@ jobs:
       id: replace_index
       if: steps.compare_files.conclusion == 'success'
       run: |
-        if [ "${{ env.exit_now }}" == "1" ]
+        if [ "${{ env.exit_now }}" == "1" ]; then
           exit 0
           fi
         mv new_index.html index.html
@@ -68,7 +68,7 @@ jobs:
       id: configure_git
       if: steps.replace_index.conclusion == 'success'
       run: |
-       if [ "${{ env.exit_now }}" == "1" ]
+       if [ "${{ env.exit_now }}" == "1" ]; then
             exit 0
             fi
         git config --global user.name "github-actions[bot]"
@@ -78,7 +78,7 @@ jobs:
       id: commit_push
       if: steps.configure_git.conclusion == 'success'
       run: |
-        if [ "${{ env.exit_now }}" == "1" ]
+        if [ "${{ env.exit_now }}" == "1" ]; then
             exit 0
             fi
         git add index.html
